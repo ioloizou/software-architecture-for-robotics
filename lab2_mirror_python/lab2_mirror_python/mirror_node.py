@@ -10,7 +10,7 @@ class MirrorNode(Node):
 		super().__init__('mirror_node')
 		
 		self.joint_positions = []
-		self.left_limb_names = ["left_e0", "left_e1", "left_s0", "left_s1", "left_w0", "left_w1", "left_w2"]
+		self.limb_names = ["_e0", "_e1", "_s0", "_s1", "_w0", "_w1", "_w2"]
         
         # Defining subcriber
 		self.create_subscription(JointState, "/robot/joint_states", self.get_state_callback, 10)
@@ -21,16 +21,26 @@ class MirrorNode(Node):
     # Subscriber callback
 	def get_state_callback(self, msg):
 		self.joint_positions = msg.position
-		# ~ for i, name in enumerate(msg.name):
-			# ~ print(f"  Joint {name}: {self.joint_positions[i]}")
+		mirror_msg = JointCommand()
+		mirror_msg.mode = 1  # Set to position mode
+			
+		for name in self.limb_names:
+			# Prepare and publish left limb command message
+			left_joint_name = "left" + name
+			right_joint_name = "right" + name
+			
+			index = msg.name.index(right_joint_name)
+			position = msg.position[index]
+			
+			mirror_msg.names.append(left_joint_name)
+			if name in ["_s1", "_e1", "_w1"]:
+				mirror_msg.command.append(position)
+			else:
+				mirror_msg.command.append(-position)
 
-		# Prepare and publish left limb command message
-		left_limb_command = JointCommand()
-		left_limb_command.mode = 1  # Set to position mode
-		left_limb_command.names = self.left_limb_names
-		left_limb_command.command = self.joint_positions # I need to put them in a specific position in the array
-		self.publisher_.publish(left_limb_command)
-
+		self.publisher_.publish(mirror_msg)
+		
+		
 def main(args=None):
 	rclpy.init(args=args)
 
