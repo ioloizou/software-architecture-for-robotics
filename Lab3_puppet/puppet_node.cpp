@@ -34,7 +34,7 @@ public:
     publisher_ = this->create_publisher<JointCommand>("/robot/limb/left/joint_command", 10);
 
     // init timer - the function publishCommand() should called with the given rate
-    timer_ = this->create_wall_timer(100ms, std::bind(&PuppetNode::publishCommand, this));
+    timer_ = this->create_wall_timer(20ms, std::bind(&PuppetNode::publishCommand, this));
 
     // IK service wrapper into IKNode
     ik_node.init("ik_node","/ExternalTools/left/PositionKinematicsNode/IKService");
@@ -71,7 +71,7 @@ private:
 
       // Create a PoseStamped message to hold the desired pose
       geometry_msgs::msg::PoseStamped desired_pose;
-      desired_pose.header.frame_id = "left_gripper_desired"; // Set the desired pose frame
+      desired_pose.header = tf_left_gripper_to_base.header; // Set the desired pose frame
 
       // Get position from the transform
       desired_pose.pose.position.x = tf_left_gripper_to_base.transform.translation.x;
@@ -85,7 +85,7 @@ private:
       // Add it to request
       req.pose_stamp.push_back(desired_pose);
 
-      std::cout<<"My x is : "<<tf_left_gripper_to_base.transform.translation.x<<std::endl;
+//      std::cout<<"My x is : "<<tf_left_gripper_to_base.transform.translation.x<<std::endl;
 
       // call service and get response
       if(SolvePositionIK::Response res; ik_node.call(req, res))
@@ -96,9 +96,12 @@ private:
         // copy response data to joint command and publish to left arm
         puppet_msg.mode = 1;
 
-        for (size_t i=0; i<7; i++)
-            puppet_msg.command = res.joints[i].position;
-
+        sensor_msgs::msg::JointState joint = res.joints[0];
+        for (size_t i=0; i<joint.name.size(); i++)
+        {
+            puppet_msg.names.push_back(joint.name[i]);
+            puppet_msg.command.push_back(joint.position[i]);
+        }
         publisher_->publish(puppet_msg);
       }
     }
@@ -182,3 +185,18 @@ RCLCPP_COMPONENTS_REGISTER_NODE(lab3_puppet::PuppetNode)
 //# otherwise,     == RESULT_INVALID (no valid solution found).
 //uint8 RESULT_INVALID = 0
 //uint8[] result_type
+
+
+
+//-----------------------------
+
+//ros2 interface show baxter_core_msgs/msg/JointCommand
+//int32 mode
+//float64[] command
+//string[] names
+
+//int32 POSITION_MODE =1
+//int32 VELOCITY_MODE =2
+//int32 TORQUE_MODE =3
+//int32 RAW_POSITION_MODE =4
+
