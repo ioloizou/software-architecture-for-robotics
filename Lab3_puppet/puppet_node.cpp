@@ -91,18 +91,19 @@ private:
       if(SolvePositionIK::Response res; ik_node.call(req, res))
       {
         // call to IK was successfull, check if the solution is valid
-
-
-        // copy response data to joint command and publish to left arm
-        puppet_msg.mode = 1;
-
-        sensor_msgs::msg::JointState joint = res.joints[0];
-        for (size_t i=0; i<joint.name.size(); i++)
+        if (res.result_type[0]!=0)
         {
-            puppet_msg.names.push_back(joint.name[i]);
-            puppet_msg.command.push_back(joint.position[i]);
+            // copy response data to joint command and publish to left arm
+            puppet_msg.mode = 1;
+
+            sensor_msgs::msg::JointState joint = res.joints[0];
+            for (size_t i=0; i<joint.name.size(); i++)
+            {
+                puppet_msg.names.push_back(joint.name[i]);
+                puppet_msg.command.push_back(joint.position[i]);
+            }
+            publisher_->publish(puppet_msg);
         }
-        publisher_->publish(puppet_msg);
       }
     }
   }
