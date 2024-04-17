@@ -24,7 +24,8 @@ def generate_launch_description():
         # TODO add some remappings or change the topics in the param file
         sl.node('nav2_amcl', 'amcl',name='amcl',
                 parameters=[sl.find('lab4_navigation', 'amcl_param.yaml')],
-                arguments='--ros-args --log-level warn')
+                arguments='--ros-args --log-level warn',
+                remappings={'map':'/map', '/scan': '/bb8/scan'})
 
         # run lifecycle manager just for AMCL
         sl.node('nav2_lifecycle_manager','lifecycle_manager',name='lifecycle_manager',
