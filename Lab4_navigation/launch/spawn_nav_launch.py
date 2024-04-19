@@ -1,5 +1,6 @@
 from simple_launch import SimpleLauncher
 import yaml
+from nav2_common.launch import RewrittenYaml
 
 # in this launch file SimpleLauncher is declared in the main body
 sl = SimpleLauncher()
@@ -15,6 +16,7 @@ def launch_setup():
     robot = sl.arg('robot')
     # extract robot type (bb / d)
     robot_type = ''.join(filter(str.isalpha, robot))
+    robot_rad = '.27' if robot_type=='bb' else '.16'
 
     with sl.group(ns = robot):
 
@@ -40,12 +42,18 @@ def launch_setup():
             nav2_params = sl.find('lab4_navigation', f'nav2_params_{sl.ros_version()}.yaml')
 
             # TODO: adapt the default parameters to this robot: namespace, links, radius
-            configured_params = nav2_params
+            configured_params = RewrittenYaml(source_file= sl.find('lab4_navigation', f'nav2_params_{sl.ros_version()}.yaml'),
+                                              root_key= robot,
+                                              param_rewrites= {'robot_base_frame': robot + '/base_link',
+                                                               'global_frame': robot + '/odom', 
+                                                               'robot_radius': robot_rad,
+                                                               'default_bt_xml_filename': sl.find('nav2_bt_navigator','navigate_w_replanning_time.xml')},
+                                              convert_types= True)
 
 
 
             # TODO: remap some topics, some nav2 nodes assume a local map topic or an absolute scan topic
-            remappings = {}
+            remappings = {'map': '/map','/scan':'scan'}
 
             # launch navigation nodes
             for pkg,executable in nav2_nodes:
