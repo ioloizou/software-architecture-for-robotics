@@ -45,7 +45,9 @@ def launch_setup():
             configured_params = RewrittenYaml(source_file= sl.find('lab4_navigation', f'nav2_params_{sl.ros_version()}.yaml'),
                                               root_key= robot,
                                               param_rewrites= {'robot_base_frame': robot + '/base_link',
-                                                               'global_frame': robot + '/odom', 
+                                                               'global_frame': robot + '/odom',
+                                                               'base_frame_id': robot+'/base_link',
+                                                               'topic': '/'+robot+'/scan', 
                                                                'robot_radius': robot_rad,
                                                                'default_bt_xml_filename': sl.find('nav2_bt_navigator','navigate_w_replanning_time.xml')},
                                               convert_types= True)
@@ -53,7 +55,7 @@ def launch_setup():
 
 
             # TODO: remap some topics, some nav2 nodes assume a local map topic or an absolute scan topic
-            remappings = {'map': '/map','/scan':'scan'}
+            remappings = {f'/{robot}/map': '/map', 'map': '/map','/scan':'scan'}
 
             # launch navigation nodes
             for pkg,executable in nav2_nodes:
