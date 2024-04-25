@@ -46,7 +46,7 @@ public:
     // init subscriber
     joint_states_subscriber_ = this->create_subscription<JointState>("robot/joint_states", 10, std::bind(&MirrorNode::joint_state_callback, this, std::placeholders::_1));
     // init publisher
-    right_command_publisher_ = this->create_publisher<JointCommand>("robot/limb/left/joint_command",10);
+    left_command_publisher_ = this->create_publisher<JointCommand>("robot/limb/left/joint_command",10);
     
   }
   
@@ -68,10 +68,10 @@ private:
       }
     }
 
-    right_command_publisher_->publish(left_command_msg_);
+    left_command_publisher_->publish(left_command_msg_);
   }
   // declare any subscriber / publisher / member variables and functions
-  rclcpp::Publisher<JointCommand>::SharedPtr right_command_publisher_;
+  rclcpp::Publisher<JointCommand>::SharedPtr left_command_publisher_;
   rclcpp::Subscription<JointState>::SharedPtr joint_states_subscriber_;
   JointCommand left_command_msg_;
 };
