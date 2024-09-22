@@ -52,7 +52,7 @@ This repository is for showcasing purposes. To explore the code and reports:
 git clone https://github.com/ioloizou/software-architecture-for-robotics.git
 ```
 
-Feel free to browse through each lab folder to view the detailed documentation and code for each assignment.
+Feel free to browse through each lab folder to view the detailed documentation and code for each assignment. If you don't have the university VM you will not be able to run it as you will be missing many dependecies.
 
 ## Contact
 
